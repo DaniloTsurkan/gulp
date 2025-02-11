@@ -1,69 +1,36 @@
-// Импорт основного модуля
-import gulp from "gulp";
-// Импорт общих плагинов
-import { plugins } from "./config/gulp-plugins.js";
-// Импорт путей
-import { path } from "./config/gulp-settings.js";
+import gulp from "gulp"
+import { path } from "./gulp/config/path.js"
+import { copy } from "./gulp/tasks/copy.js"
+import { reset } from "./gulp/tasks/reset.js"
+import { html } from "./gulp/tasks/html.js"
+import { plugins } from "./gulp/config/plugins.js"
+import { server } from "./gulp/tasks/server.js"
+import { scss } from "./gulp/tasks/scss.js"
+import { js } from "./gulp/tasks/js.js"
+import { images } from "./gulp/tasks/images.js"
+import { fontsStyle, otfToTtf, ttfToWoff } from "./gulp/tasks/fonts.js"
 
-// Передаем значения в глобальную переменную
 global.app = {
-	isBuild: process.argv.includes('--build'),
-	isDev: !process.argv.includes('--build'),
-	isWebP: !process.argv.includes('--nowebp'),
-	isFontsReW: process.argv.includes('--rewrite'),
-	gulp: gulp,
 	path: path,
+	gulp: gulp,
 	plugins: plugins
 }
 
-// Импорт задач
-import { reset } from "./config/gulp-tasks/reset.js";
-import { html } from "./config/gulp-tasks/html.js";
-import { css } from "./config/gulp-tasks/css.js";
-import { js } from "./config/gulp-tasks/js.js";
-import { jsDev } from "./config/gulp-tasks/js-dev.js";
-import { images } from "./config/gulp-tasks/images.js";
-import { ftp } from "./config/gulp-tasks/ftp.js";
-import { zip } from "./config/gulp-tasks/zip.js";
-import { sprite } from "./config/gulp-tasks/sprite.js";
-import { gitignore } from "./config/gulp-tasks/gitignore.js";
-import { ttfToWoff, fonstStyle } from "./config/gulp-tasks/fonts.js";
-
-// Последовательная обработака шрифтов
-const fonts = gulp.series(reset, ttfToWoff, fonstStyle);
-// Основные задачи будем выполнять параллельно после обработки шрифтов
-const devTasks = gulp.parallel(fonts, gitignore);
-// Основные задачи будем выполнять параллельно после обработки шрифтов
-const buildTasks = gulp.series(fonts, jsDev, js, gulp.parallel(html, css, images, gitignore));
-
-// Экспорт задач
-export { html }
-export { css }
-export { js }
-export { jsDev }
-export { images }
-export { fonts }
-export { sprite }
-export { ftp }
-export { zip }
-
-// Построение сценариев выполнения задач
-const development = gulp.series(devTasks);
-const build = gulp.series(buildTasks);
-const deployFTP = gulp.series(buildTasks, ftp);
-const deployZIP = gulp.series(buildTasks, zip);
-
-// Экспорт сценариев
-export { development }
-export { build }
-export { deployFTP }
-export { deployZIP }
-
-// Выполнение сценария по умолчанию
-gulp.task('default', development);
 
 
+function watcher() {
+	gulp.watch(path.watch.files, copy)
+	gulp.watch(path.watch.html, html)
+	gulp.watch(path.watch.scss, scss)
+	gulp.watch(path.watch.js, js)
+	gulp.watch(path.watch.images, images)
+}
+
+const fonts = gulp.series(otfToTtf, ttfToWoff, fontsStyle)
+
+const mainTask = gulp.series(fonts, gulp.parallel(copy, html, scss, js, images))
+
+const dev = gulp.series(reset, mainTask, gulp.parallel(watcher, server))
 
 
-
-
+gulp.task('default', dev)
