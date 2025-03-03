@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-
-@@include('html/head.html',
-{
+@@include('html/head.html',{
 "title":"Home"
 })
 
 <body>
 	<div class="wrapper">
-		<header class="header">
-			@@include('html/header.html')
-			<main class="page"></main>
-			<footer class="footer"></footer>
+		@@include('html/header.html',{})
+		<main class="page">
+			<span>Hello</span>
+			<img src="@img/cover.png" alt="">
+		</main>
+		@@include('html/footer.html',{})
 	</div>
-	<img src="@img/download.jpg" alt="">
-	<script src="js/app.min.js"></script>
 </body>
 
 </html>
