@@ -1,0 +1,84 @@
+@use "sass:math";
+
+// Подключение шрифта
+@mixin font($font_name, $file_name, $weight, $style) {
+	@font-face {
+		font-family: $font_name;
+		font-display: swap;
+		src: url("../fonts/#{$file_name}.woff2") format("woff2"),
+		url("../fonts/#{$file_name}.woff") format("woff");
+		font-weight: #{$weight};
+		font-style: #{$style};
+	}
+}
+
+// Процентна функція
+@function percent($px, $from) {
+	@return math.div($px, $from) * 100%;
+}
+
+// Функція для REM
+@function rem($px) {
+	@return math.div($px, 16)+rem;
+}
+
+// Функція для EM
+@function em($px, $current: 16) {
+	@return math.div($px, $current)+em;
+}
+
+// Міксин для валютного символу
+@mixin currency($sym) {
+	&::after {
+		content: "#{$sym}";
+	}
+}
+
+// Міксин для грида
+@mixin gridCards($type: fit, $min: 280px, $max: 1fr, $gap: 30px) {
+	display: grid;
+	gap: $gap;
+	grid-template-columns: repeat(auto-#{$type}, minmax($min, $max));
+}
+
+// Адаптивне значення (clamp)
+@mixin adaptiveValue($property, $startSize, $minSize, $widthFrom: 1200px, $widthTo: 320px, $keepSize: 0) {
+	@if ($startSize ==0) {
+		$startSize: 0.000001;
+	}
+
+	@if ($minSize ==0) {
+		$minSize: 0.000001;
+	}
+
+	$slope: math.div(($startSize - $minSize), ($widthFrom - $widthTo));
+	$yIntersection: -$widthTo * $slope + $minSize;
+
+	@if ($yIntersection ==0) {
+		$yIntersection: 0.000001;
+	}
+
+	$flyValue: #{rem($yIntersection)} " + "#{$slope * 100}vw;
+
+	$propertyValue: clamp(#{rem($minSize)}, #{$flyValue}, #{rem($startSize)});
+
+	@supports (#{$property}: $propertyValue) {
+		#{$property}: $propertyValue;
+	}
+
+	@supports not (#{$property}: $propertyValue) {
+		#{$property}: calc(#{rem($minSize)} + #{math.div($startSize - $minSize, 16)} * (100vw - #{rem($widthTo)}) / #{math.div($widthFrom, 16) - math.div($widthTo, 16)});
+	}
+
+	@if $widthFrom !=1200px and $widthFrom !=100vw and $keepSize !=1 and $keepSize !=2 {
+		@media (min-width: #{em($widthFrom)}) {
+			#{$property}: inherit;
+		}
+	}
+
+	@if $widthTo !=320px and $keepSize !=1 and $keepSize !=3 {
+		@media (max-width: #{em($widthTo)}) {
+			#{$property}: inherit;
+		}
+	}
+}

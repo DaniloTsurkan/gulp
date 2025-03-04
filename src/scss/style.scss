@@ -1,18 +1,87 @@
-@use 'fonts' as *;
+// _main.scss
+@use "sass:math";
+@use "variables";
+@use "base/mixins" as *;
+@use "base" as *;
+@use "base/null" as *;
+
+body {
+	.lock & {
+		overflow: hidden;
+		touch-action: none;
+	}
+
+	.loaded & {}
+}
+
+.wrapper {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+	>main {
+		flex: 1 1 auto;
+	}
+
+	>* {
+		min-width: 0;
+	}
+}
+
+@if (variables.$responsiveType ==1) {
+	[class*="__container"] {
+		@if (variables.$maxWidthContainer > 0) {
+			max-width: rem(variables.$maxWidthContainer);
+			box-sizing: content-box;
+			margin: 0 auto;
+		}
+
+		@if (variables.$containerPadding > 0) {
+			padding: 0 rem(math.div(variables.$containerPadding, 2));
+		}
+	}
+}
+
+@else {
+	[class*="__container"] {
+		margin: 0 auto;
+
+		@if (variables.$maxWidthContainer > 0) {
+			max-width: rem(variables.$maxWidthContainer);
+			box-sizing: content-box;
+		}
+
+		@else {
+			@if (variables.$containerPadding > 0) {
+				padding: 0 rem(math.div(variables.$containerPadding, 2));
+			}
+		}
+
+		@media (max-width: variables.$pc) {
+			max-width: rem(970);
+		}
+
+		@media (max-width: variables.$tablet) {
+			max-width: rem(750);
+		}
+
+		@media (max-width: variables.$mobile) {
+			max-width: none;
+
+			@if (variables.$containerPadding > 0 and variables.$maxWidthContainer > 0) {
+				padding: 0 rem(math.div(variables.$containerPadding, 2));
+			}
+		}
+	}
+}
+
+// HEADER
 
 body {
 	background-color: #000;
 
-	@media (max-width:767.98px) {
-		background-color: rgba(95, 95, 95, 0.886);
-	}
-
 	span {
 		color: #fff;
-
-		// background: url('@img/завантаження.png') 0 0 no-repeat;
-		@media (max-width:767.98px) {
-			color: #ffffffd8;
-		}
 	}
 }
